@@ -1,0 +1,74 @@
+# GitLab CI/CD configuration
+# P13@3DS.com
+# please read Gitlab-CI-Setup.md to enable CI/CD on the repository
+# https://itgit.dsone.3ds.com/widget-lab/documentation/blob/master/build_Gitlab-CI-Setup.md
+
+# default image: dswidgetlab/node:latest
+image: dswidgetlab/node
+
+stages:
+    - build
+    - deploy
+
+cache:
+    # setup a cache for each branch
+    key:
+        files:
+            - package.json
+    paths:
+        - node_modules/
+
+##########################
+# npm build
+# stage: build
+# build widget (npm run build)
+
+npm_build:
+    stage: build
+    tags:
+        - widgetlab
+    artifacts:
+        expire_in: 10min
+        paths:
+            - dist/
+    script:
+        - npm install --unsafe-perm
+        - npm run build
+
+##########################
+# push_widget (master only)
+# stage: deploy
+# Push widget to AWS S3
+
+push_widget:
+    stage: deploy
+    image: dswidgetlab/awscli
+    tags:
+        - widgetlab
+    only:
+        - master
+    allow_failure: true
+    script:
+        - export S3_DST=s3://btcc/widget-lab/$CI_PROJECT_NAME/
+        - aws s3 sync ./dist/ $S3_DST --acl public-read --delete
+        - echo "***** $GITLAB_USER_NAME pushed $CI_PROJECT_NAME (commit $CI_COMMIT_SHORT_SHA) to $S3_DST *****"
+
+##########################
+# zip_to_s3 (master only)
+# stage: deploy
+# Push widget package to AWS S3
+
+zip_to_s3:
+    stage: deploy
+    image: dswidgetlab/awscli
+    tags:
+        - widgetlab
+    only:
+        - master
+    script:
+        - |-
+            sed -i 's/"\(@widget-lab\)\/\(.\+\)"\s*\:\s*"\(\^\|~\)*\(.\+\)"/"\1\/\2": "https\:\/\/btcc.3ds.com\/widget-lab\/npm\/widget-lab-\2-\4.tgz"/g' package.json
+        - zip -r /home/s3/$CI_PROJECT_NAME.zip . -x@.zipignore
+        - export S3_DST=s3://btcc/widget-lab/templates/
+        - aws s3 sync /home/s3/ $S3_DST --acl public-read
+        - echo "***** $GITLAB_USER_NAME pushed $CI_PROJECT_NAME (commit $CI_COMMIT_SHORT_SHA) to $S3_DST$CI_PROJECT_NAME.zip *****"

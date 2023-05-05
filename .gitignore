@@ -1,0 +1,8 @@
+node_modules
+dist
+test/**/report/*
+*.pem
+*.crt
+*.key 
+localConfig.js
+widget-config.js
