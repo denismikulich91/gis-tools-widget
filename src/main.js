@@ -3,7 +3,7 @@ import x3DSIconVue from "@widget-lab/3ds-icons-vue3";
 import { createApp } from "vue";
 import App from "./components/app.vue";
 import { store } from "./store";
-import { Notify, Quasar, useQuasar } from "./plugins/quasar";
+import { Quasar, useQuasar } from "./plugins/quasar";
 
 function start() {
     disableDefaultCSS(true);
@@ -13,10 +13,14 @@ function start() {
 
     const app = createApp(App);
 
-    app.use(Quasar, { plugins: [Notify, useQuasar] });
+    app.use(Quasar, { plugins: [useQuasar] });
     app.use(store);
     app.use(x3DSIconVue);
     app.mount("app");
+
+    requirejs(["DS/PlatformAPI/PlatformAPI"], (/* PlatformAPI */) => {
+        // use 3DDashboard APIs
+    });
 
     onVisibilityChange((/* visibility  */) => {
         // widget (or fullpage) visibility has changed

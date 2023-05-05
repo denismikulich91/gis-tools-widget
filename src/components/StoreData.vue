@@ -24,56 +24,31 @@
 <script>
 // import { requirejs } from "@widget-lab/3ddashboard-utils";
 
-import { getResults } from "../plugins/tempModule";
-import { widget } from "@widget-lab/3ddashboard-utils";
+// import { getResults } from "../plugins/tempModule";
+import { widget, requirejs } from "@widget-lab/3ddashboard-utils";
 export default {
   name: "StoreData",
   data() {
     return {
       mainColor: widget.getValue("mainColor"),
-      storeData: null,
-      test: 'dog'
+      storeData: {}
     };
   },
-  // computed: {
-  //   async getData() {
-  //     let { results } = await import ("../plugins/tempModule");
-  //     return results;
-  //   }
-  // },
-
-  //     requirejs(["DS/PlatformAPI/PlatformAPI"], PlatformAPI => {
-  //       PlatformAPI.subscribe("xCity.resolve", result => {
-  //         if (result.topic === "xCity.onSelect") {
-  //           let dataRoot = result.data.geojson.features[0].properties;
-  //           this.StoreData.name = dataRoot.NAME;
-  //           this.StoreData.country = dataRoot.country;
-  //           this.StoreData.coords = dataRoot.TRANS.split(" ").map(el => parseFloat(el).toFixed(2));
-  //           // Why is it still string type?
-  //           // console.log("fetched data;", this.StoreData);
-  //     }
-  //     });
-  //   });
-  //   return this.StoreData;
-  //   }
-  // },
+  async mounted() {
+    const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");
+    platformAPI.subscribe("xCity.resolve", result => result.topic === "xCity.onSelect" ? this.getData(result) : null);
+  },
   methods: {
-    check() {
+    getData(result) {
+      console.log(result);
+      let dataRoot = result.data.geojson.features[0].properties;
+      this.storeData.name = dataRoot.NAME;
+      this.storeData.country = dataRoot.country;
+      this.storeData.coords = dataRoot.TRANS.split(" ").map(el => parseFloat(el).toFixed(2));
       console.log(this.storeData);
       // this.$forceUpdate();
-    }
-  },
-  created() {
-    this.storeData = getResults()
-  },
-  watch: {
-    storeData: {
-      handler() {
-        console.log('test')
-      },
-      deep: true,
-      immediate: true
-    }
+
   }
+}
 };
 </script>
