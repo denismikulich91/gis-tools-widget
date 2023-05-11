@@ -78,7 +78,9 @@
     "dependencies": {
         "@widget-lab/3ddashboard-utils": "^1.6.0",
         "@widget-lab/3ds-icons-vue3": "^1.0.0",
+        "apify-client": "^2.7.1",
         "core-js": "^3.14.0",
+        "proj4": "^2.9.0",
         "quasar": "^2.0.3",
         "quasar-extras": "^2.0.9",
         "vue": "^3.0.7",

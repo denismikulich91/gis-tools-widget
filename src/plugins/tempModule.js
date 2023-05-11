@@ -1,17 +1,23 @@
-import { requirejs } from "@widget-lab/3ddashboard-utils";
-export const getResults = () => {
-  const results = {};
-  requirejs(["DS/PlatformAPI/PlatformAPI"], PlatformAPI => {
-    PlatformAPI.subscribe("xCity.resolve", result => {
-      if (result.topic === "xCity.onSelect") {
-        let dataRoot = result.data.geojson.features[0].properties;
-        results.name = dataRoot.NAME;
-        results.country = dataRoot.country;
-        results.coords = dataRoot.TRANS.split(" ").map(el => parseFloat(el).toFixed(2));
-        // Why is it still string type?
-        console.log("fetched data;", typeof results.coords[0]);
-      }
-      });
+import { ApifyClient } from "apify-client";
+console.log('init')
+// Initialize the ApifyClient with API token
+const client = new ApifyClient({
+    token: "apify_api_CPKlOJ9kGv9qTdc5X3i3yrHMVT5Noy1HELoJ"
+});
+
+// Prepare actor input
+const input = {
+    "keywords": "apple"
+};
+
+(async () => {
+    // Run the actor and wait for it to finish
+    const run = await client.actor("jupri/asda-scraper").call(input);
+
+    // Fetch and print actor results from the run's dataset (if any)
+    console.log("Results from dataset");
+    const { items } = await client.dataset(run.defaultDatasetId).listItems();
+    items.forEach(item => {
+        console.dir(item);
     });
-    return results;
-  };
+});
