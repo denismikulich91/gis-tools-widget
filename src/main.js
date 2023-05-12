@@ -19,7 +19,7 @@ function start() {
           brand: {
             primary: '#005685',
             secondary: '#42a2da',
-            accent: '#70036b',
+            accent: '#F2F2F2',
       
             dark: '#1d1d1d',
             'dark-page': '#1a1515',

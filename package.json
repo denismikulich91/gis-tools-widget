@@ -80,6 +80,7 @@
         "@widget-lab/3ds-icons-vue3": "^1.0.0",
         "apify-client": "^2.7.1",
         "core-js": "^3.14.0",
+        "material-icons": "^1.13.6",
         "proj4": "^2.9.0",
         "quasar": "^2.0.3",
         "quasar-extras": "^2.0.9",

@@ -1,37 +1,102 @@
 <template>
     <div class="q-pa-md example-column-row-width">
-        <q-banner inline-actions class="row text-white bg-primary">
-            <p style="font-size: 20px; margin: 5px 0px;">Isochrones generator</p>
-            <template v-slot:action>
-                <ds-icon style="font-size: 20px;">3ds</ds-icon>
-            </template>
-        </q-banner>
-        <q-input v-model="distanceMinutes" filled label="Set the isochrone distance in minutes" />
-        <q-select 
-            v-model="pathChoice" 
-            filled :options="pathOptions" 
-            label="Path parameter"
-            transition-show="flip-up"
-            transition-hide="flip-down"
-            />
-            <div class="row bg-secondary items-center justify-between" style="margin-top: 30px;">
-                <p class="text-white" style="margin-left: 12px; margin-bottom: 0px; font-size: 15px;">
-                    Start location
-                </p>
-                <q-btn size="sm" class="col-auto" outline color="white" icon="my_location" 
-                style="margin: 5px 12px; width: 20px;" > 
-                    <q-tooltip class="bg-gray" :offset="[0, 10]" :delay="1000">
-                        <span style="font-size: 10px;">Click on the City map to get coordinates</span>
-                    </q-tooltip>
-                </q-btn>
+        <q-list bordered>
+            <q-expansion-item
+                group="openRouteWidgets"
+                icon="explore"
+                label="Create isochrone"
+                header-class="bg-primary text-white"
+            >
+            <q-card>
+                <q-card-section>
+                    <q-input v-model="distanceMinutes" filled label="Set the isochrone distance in minutes" />
+                    <q-select 
+                        v-model="pathChoice" 
+                        filled :options="pathOptions" 
+                        label="Path parameter"
+                        transition-show="flip-up"
+                        transition-hide="flip-down"
+                        />
+                        <div class="row bg-secondary items-center justify-between" style="margin-top: 30px;">
+                            <p class="text-white" style="margin-left: 12px; margin-bottom: 0px; font-size: 15px;">
+                                Start location
+                            </p>
+                            <q-btn size="sm" class="col-auto" outline color="white" icon="my_location" 
+                            style="margin: 5px 12px; width: 20px;" > 
+                                <q-tooltip class="bg-gray" :offset="[0, 10]" :delay="1000">
+                                    <span style="font-size: 10px;">Click on the City map to get coordinates</span>
+                                </q-tooltip>
+                            </q-btn>
+                        </div>
+                    <q-input v-model="coordinates[0]" filled label="X" style="margin-top: 0px;"/>
+                    <q-input v-model="coordinates[1]" filled label="Y" />
+                    <q-btn class="run-button" 
+                        @click="getOpenRouterRequest" 
+                        style="margin-top: 30px;" 
+                        color="secondary" 
+                        label="Get isochrone" />
+                    </q-card-section>
+                </q-card>
+            </q-expansion-item>
+
+            <q-separator />
+
+            <q-expansion-item
+                group="openRouteWidgets"
+                icon="place"
+                label="Get directions"
+                header-class="bg-positive text-white"
+                default-opened
+            >
+        <q-card>
+          <q-card-section>
+            <div class="col q-pa-xs">
+                <q-input square filled v-model="fromLocation" label="From" :dense="dense" label-color="positive">
+                    <template v-slot:append>
+                    <q-btn outline round size="sm" icon="place" color="positive"/>
+                    </template>
+                </q-input>
+                <q-input square filled v-model="toLocation" label="To" :dense="dense" label-color="positive">
+                    <template v-slot:append>
+                    <q-btn outline round size="sm" icon="place" color="positive" style="width=25px" />
+                    </template>
+                </q-input>
+                <q-btn-toggle
+                style="margin-top: 10px;"
+                    v-model="travelChoice"
+                    spread
+                    toggle-color="secondary"
+                    color="positive"
+                    :options="[
+                    {value: 'byWalk', slot: '1'},
+                    {value: 'byBike', slot: '2'},
+                    {value: 'byCar', slot: '3'},
+                    {value: 'byPublic', slot: '4'}
+                    ]"
+                >
+                    <template v-slot:1>
+                        <q-icon name="directions_walk" />
+                    </template>
+                    <template v-slot:2>
+                        <q-icon name="directions_bike" />
+                    </template>
+                    <template v-slot:3>
+                        <q-icon name="directions_car" />
+                    </template>
+                    <template v-slot:4>
+                        <q-icon name="directions_bus" />
+                    </template>
+                </q-btn-toggle>
+                <q-btn class="run-button" 
+                        @click="getOpenRouterRequest" 
+                        style="margin-top: 30px;" 
+                        color="secondary" 
+                        label="Get route" />
             </div>
-        <q-input v-model="coordinates[0]" filled label="X" style="margin-top: 0px;"/>
-        <q-input v-model="coordinates[1]" filled label="Y" />
-        <q-btn class="run-button" 
-            @click="getOpenRouterRequest" 
-            style="margin-top: 30px;" 
-            color="secondary" 
-            label="Get isochrone" />     
+          </q-card-section>
+        </q-card>
+      </q-expansion-item>
+        </q-list>     
     </div>
 </template>
 
@@ -53,6 +118,9 @@ import "@widget-lab/3ds-icons-vue3/out/static/3ds-icons.css";
 export default {
     data() {
         return {
+            travelChoice: 'byWalk',
+            fromLocation: null,
+            toLocation: null,
             widgetId: widget.id,
             key: widget.getValue("key"),
             // key: "5b3ce3597851110001cf6248575c5a9ab2384617b5665773e5e51a29",
