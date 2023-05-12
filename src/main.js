@@ -3,7 +3,7 @@ import x3DSIconVue from "@widget-lab/3ds-icons-vue3";
 import { createApp } from "vue";
 import App from "./components/app.vue";
 import { store } from "./store";
-import { Quasar, useQuasar } from "./plugins/quasar";
+import { Quasar } from "./plugins/quasar";
 
 function start() {
     disableDefaultCSS(true);
@@ -13,7 +13,24 @@ function start() {
 
     const app = createApp(App);
 
-    app.use(Quasar, { plugins: [useQuasar] });
+    // app.use(Quasar, { plugins: [useQuasar] });
+    app.use(Quasar, {
+        config: {
+          brand: {
+            primary: '#005685',
+            secondary: '#42a2da',
+            accent: '#70036b',
+      
+            dark: '#1d1d1d',
+            'dark-page': '#1a1515',
+      
+            positive: '#64B83F',
+            negative: '#ea4f37',
+            info: '#31CCEC',
+            warning: '#e87b00',
+          }
+        }
+      }),
     app.use(store);
     app.use(x3DSIconVue);
     app.mount("app");
