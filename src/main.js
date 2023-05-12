@@ -4,7 +4,6 @@ import { createApp } from "vue";
 import App from "./components/app.vue";
 import { store } from "./store";
 import { Quasar } from "./plugins/quasar";
-
 function start() {
     disableDefaultCSS(true);
 

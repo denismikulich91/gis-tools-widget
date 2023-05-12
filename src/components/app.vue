@@ -6,47 +6,76 @@
                 icon="explore"
                 label="Create isochrone"
                 header-class="bg-primary text-white"
+                default-opened
             >
             <q-card>
                 <q-card-section>
-                    <q-input v-model="distanceMinutes" filled label="Set the isochrone distance in minutes" />
-                    <q-select 
-                        v-model="pathChoice" 
-                        filled :options="pathOptions" 
-                        label="Path parameter"
-                        transition-show="flip-up"
-                        transition-hide="flip-down"
-                        />
-                        <div class="row bg-secondary items-center justify-between" style="margin-top: 30px;">
-                            <p class="text-white" style="margin-left: 12px; margin-bottom: 0px; font-size: 15px;">
-                                Start location
-                            </p>
-                            <q-btn size="sm" class="col-auto" outline color="white" icon="my_location" 
+                    <div class="row bg-secondary items-center justify-between">
+                        <p class="text-white" style="margin-left: 12px; margin-bottom: 0px; font-size: 15px;">
+                            Start location
+                        </p>
+                        <q-btn size="sm" class="col-auto" outline color="white" icon="my_location" 
                             style="margin: 5px 12px; width: 20px;" > 
-                                <q-tooltip class="bg-gray" :offset="[0, 10]" :delay="1000">
-                                    <span style="font-size: 10px;">Click on the City map to get coordinates</span>
-                                </q-tooltip>
-                            </q-btn>
-                        </div>
-                    <q-input v-model="coordinates[0]" filled label="X" style="margin-top: 0px;"/>
-                    <q-input v-model="coordinates[1]" filled label="Y" />
-                    <q-btn class="run-button" 
+                            <q-tooltip class="bg-gray" :offset="[0, 10]" :delay="1000">
+                                <span style="font-size: 10px;">Click on the City map to get coordinates</span>
+                            </q-tooltip>
+                        </q-btn>
+                    </div>
+                    <div class="row">
+                        <q-input class="col" v-model="coordinates[0]" filled label="X" style="margin-top: 0px;"/>
+                        <q-input class="col" v-model="coordinates[1]" filled label="Y" />
+                    </div>  
+                    <q-input v-model="distanceMinutes" filled label="Set the isochrone distance in minutes" />
+                    <q-btn-toggle
+                        style="margin-top: 10px;"
+                        v-model="pathChoice"
+                        spread
+                        toggle-color="secondary"
+                        text-color="black"
+                        color="accent"
+                        :options="[
+                        {value: 'Walk', slot: '1'},
+                        {value: 'Bicycle', slot: '2'},
+                        {value: 'Electric-bike', slot: '3'},
+                        {value: 'Car', slot: '4'}
+                        ]"
+                    >
+                    <template v-slot:1>
+                        <q-icon name="hiking" />
+                    </template>
+                    <template v-slot:2>
+                        <q-icon name="directions_bike" />
+                    </template>
+                    <template v-slot:3>
+                        <q-icon name="electric_moped" />
+                    </template>
+                    <template v-slot:4>
+                        <q-icon name="directions_car" />
+                    </template>
+                    </q-btn-toggle>
+                    <q-btn-group style="margin-top: 10px;">
+                        <q-btn :style="{ backgroundColor: isochroneColor }" style="color:white" icon="format_color_fill">
+                            <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                            <q-color v-model="isochroneColor" format-model="rgba"/>
+                            </q-popup-proxy>
+                        </q-btn>
+                        <q-btn color="secondary" icon="add" />
+                    </q-btn-group>
+                    <q-btn class="row run-button" 
                         @click="getOpenRouterRequest" 
-                        style="margin-top: 30px;" 
+                        style="margin-top: 30px" 
                         color="secondary" 
-                        label="Get isochrone" />
-                    </q-card-section>
-                </q-card>
+                        label="Get isochrone"
+                    />
+                </q-card-section>
+            </q-card>
             </q-expansion-item>
-
             <q-separator />
-
             <q-expansion-item
                 group="openRouteWidgets"
                 icon="place"
                 label="Get directions"
                 header-class="bg-positive text-white"
-                default-opened
             >
         <q-card>
           <q-card-section>
@@ -113,11 +142,13 @@
 <script>
 import axios from 'axios';
 import { widget, requirejs } from "@widget-lab/3ddashboard-utils";
-import "@widget-lab/3ds-icons-vue3/out/static/3ds-icons.css";
+
 // import { ref } from "vue";
 export default {
     data() {
         return {
+            isochroneColor:'rgba(66,162,218,0.6)',
+            dense: null, // Probably keeps an info about opened part
             travelChoice: 'byWalk',
             fromLocation: null,
             toLocation: null,
@@ -126,9 +157,9 @@ export default {
             // key: "5b3ce3597851110001cf6248575c5a9ab2384617b5665773e5e51a29",
             requestResults: "",
             currentCRS: "4326",
-            coordinates: [0, 0],
+            coordinates: [],
             distanceMinutes: 10,
-            pathChoice: "",
+            pathChoice: "Walk",
             pathOptions: ["Walk", "Bicycle", "Electric-bike", "Car"],
             mainColor: widget.getValue("mainColor"),
             mainSize: `${widget.getValue("size")}px`,
@@ -139,12 +170,6 @@ export default {
                 "Electric-bike": "cycling-electric",
                 "Car": "driving-car"
             },
-            colorMapping: {
-                "Walk" : "rgb(255,0,0)",
-                "Bicycle": "rgb(0,255,0)",
-                "Electric-bike": "rgb(0,255,50)",
-                "Car": "rgb(0,0,255)"
-            }
         };
     },
 
@@ -154,6 +179,10 @@ export default {
         },
         getPathKey() {
             return (this.pathChoice !== '') ? this.pathMapping[this.pathChoice] : 'driving-car';
+        },
+        getOpacity() {
+            var array = this.isochroneColor.replace('rgba(', '').replace(')', '').split(',');
+            return array[array.length - 1];
         }
     },
 
