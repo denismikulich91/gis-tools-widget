@@ -53,14 +53,33 @@
                         <q-icon name="directions_car" />
                     </template>
                     </q-btn-toggle>
-                    <q-btn-group style="margin-top: 10px;">
-                        <q-btn :style="{ backgroundColor: isochroneColor }" style="color:white" icon="format_color_fill">
-                            <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                            <q-color v-model="isochroneColor" format-model="rgba"/>
-                            </q-popup-proxy>
-                        </q-btn>
-                        <q-btn color="secondary" icon="add" />
-                    </q-btn-group>
+                    <div class="row justify-between items-center" style="margin-top: 30px">
+                        <div class="row justify-start col-10">
+                            <q-btn class="col-2" :style="{ backgroundColor: isochroneColor }" style="color:white" icon="format_color_fill">
+                                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                                    <q-color v-model="isochroneColor" format-model="hex"/>
+                                </q-popup-proxy>
+                            </q-btn>
+                            <q-slider
+                                class="col-6 self-end"
+                                size="s"
+                                v-model="opacity"
+                                :label-value="'Opacity: ' + opacity + '%'"
+                                :min="0"
+                                :max="100"
+                                label-always
+                                color="positive"
+                                style="margin-left: 20px; height: 15px;"
+                            />
+                        </div>
+                            <q-btn 
+                            style="height: 15px; width:15px" 
+                            class="col-auto self-center" 
+                            outline 
+                            color="secondary" 
+                            icon="add"
+                            />
+                        </div>
                     <q-btn class="row run-button" 
                         @click="getOpenRouterRequest" 
                         style="margin-top: 30px" 
@@ -147,7 +166,8 @@ import { widget, requirejs } from "@widget-lab/3ddashboard-utils";
 export default {
     data() {
         return {
-            isochroneColor:'rgba(66,162,218,0.6)',
+            opacity: 60,
+            isochroneColor:'#42a2da',
             dense: null, // Probably keeps an info about opened part
             travelChoice: 'byWalk',
             fromLocation: null,
@@ -180,9 +200,8 @@ export default {
         getPathKey() {
             return (this.pathChoice !== '') ? this.pathMapping[this.pathChoice] : 'driving-car';
         },
-        getOpacity() {
-            var array = this.isochroneColor.replace('rgba(', '').replace(')', '').split(',');
-            return array[array.length - 1];
+        getOpacityFactor() {
+            return this.opacity / 100;
         }
     },
 
@@ -209,6 +228,7 @@ export default {
         };
         try {
             const response = await axios.post(
+                // TODO: check if the key wrong
             `https://api.openrouteservice.org/v2/isochrones/${this.getPathKey}`,
             body,
             {
