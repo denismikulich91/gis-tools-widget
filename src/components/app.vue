@@ -6,7 +6,7 @@
                 icon="explore"
                 label="Create isochrone"
                 header-class="bg-primary text-white"
-                default-opened
+                :default-opened="getActiveWidget==='isochrone'"
             >
             <q-card>
                 <q-card-section>
@@ -20,6 +20,7 @@
                 icon="place"
                 label="Get directions"
                 header-class="bg-positive text-white"
+                :default-opened="getActiveWidget==='routes'"
             >
         <q-card>
           <q-card-section>
@@ -57,7 +58,7 @@ export default {
         },
     computed: {
         getActiveWidget() {
-            return widget.getValue("default")
+            return widget.getValue("defaultWidget")
         }
     }
 }
