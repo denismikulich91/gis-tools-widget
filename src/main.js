@@ -32,7 +32,7 @@ function start() {
       }),
     app.use(store);
     app.use(x3DSIconVue);
-    app.mount("app");
+    app.mount("App");
 
     requirejs(["DS/PlatformAPI/PlatformAPI"], (/* PlatformAPI */) => {
         // use 3DDashboard APIs
