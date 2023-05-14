@@ -68,7 +68,6 @@
         @click="addComponent"
         style="height: 15px; width:15px" 
         class="col-auto self-center" 
-        outline 
         color="secondary" 
         icon="add"
         />
@@ -82,12 +81,22 @@
     :time="component.time" 
     :key="index" />
   </div>
-<q-btn class="row run-button" 
-    @click="getIsochroneRequest" 
+  <q-btn
+    class="row run-button" 
+    @click="getIsochroneRequest"
     style="margin-top: 30px" 
     color="secondary" 
     label="Get isochrone"
-/>
+  >
+  <q-popup-proxy v-if="!isHasRequests">
+    <q-banner>
+      <template v-slot:avatar>
+        <q-icon name="add_box" color="primary" />
+      </template>
+      The request list is empty, please click the "add" button to add a new request
+    </q-banner>
+  </q-popup-proxy>
+  </q-btn>
 </template>
 
 <style>
@@ -124,9 +133,7 @@ export default {
           distanceMinutes: 10,
           pathChoice: "Walk",
           // pathOptions: ["Walk", "Bicycle", "Electric-bike", "Car"],
-          mainColor: widget.getValue("mainColor"),
           mainSize: `${widget.getValue("size")}px`,
-          headerColor: "bg-" + widget.getValue("mainColor"),
           pathMapping: {
               "Walk" : "foot-walking",
               "Bicycle": "cycling-regular",
@@ -143,9 +150,11 @@ export default {
     },
 
     computed: {
-
         getOpacityFactor() {
             return this.opacity / 100;
+        },
+        isHasRequests() {
+          return this.settingsComponents.length > 0;
         }
     },
 
@@ -183,7 +192,8 @@ export default {
       this.getCoordsMode = false;
     },
     async getIsochroneRequest() {
-      for (const singleRequest of this.settingsComponents) {
+      if (this.isHasRequests) {
+        for (const singleRequest of this.settingsComponents) {
         console.log(singleRequest)
         const body = {
             "locations": [singleRequest.coordinates],
@@ -212,9 +222,10 @@ export default {
             console.error(error);
         }
         }
+      }
       },
     async sendResults(singleRequest) {
-        console.log(this.requestResults)
+        console.log(singleRequest)
         const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");
         // platformAPI.publish('3DEXPERIENCity.AddPolygon', {
         //     geojson: {

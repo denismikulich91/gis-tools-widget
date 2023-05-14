@@ -43,11 +43,22 @@
 
 <script>
 import IsochroneWidget from './isochroneWidget.vue';
+import { useQuasar } from 'quasar'
 import RouteWidget from './routeWidget.vue';
+import { widget } from "@widget-lab/3ddashboard-utils";
 export default {
     components: {
         IsochroneWidget,
         RouteWidget
-            },
+        },
+        setup () {
+        const $q = useQuasar()
+        $q.dark.set(widget.getValue("nightMode"))
+        },
+    computed: {
+        getActiveWidget() {
+            return widget.getValue("default")
+        }
+    }
 }
 </script>
