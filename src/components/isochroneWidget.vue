@@ -121,13 +121,14 @@ export default {
       },
     data() {
         return {
+          centralPointCounter: 0,
           settingsComponents: [],
           getCoordsMode: false,
           opacity: 60,
           isochroneColor:'#42a2da',
           widgetId: widget.id,
-          // key: widget.getValue("key"),
-          key: "5b3ce3597851110001cf6248575c5a9ab2384617b5665773e5e51a29",
+          key: widget.getValue("key"),
+          // key: "5b3ce3597851110001cf6248575c5a9ab2384617b5665773e5e51a29",
           currentCRS: "4326",
           coordinates: [8.68149, 49.41],
           distanceMinutes: 10,
@@ -160,11 +161,9 @@ export default {
 
     async mounted() {
     const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");
-    if (this.getCoordsMode) {
       platformAPI.subscribe("xCity.resolve", result => result.topic === "xCity.onClick" ? this.getCoords(result) : null);
       // platformAPI.subscribe("xCity.resolve", result => result.topic === "xCity.onSelect" ? console.log(result): null);
       platformAPI.subscribe('3DEXPERIENCity.AddPolygonReturn', result => console.log(result))
-      }
     },
     methods: {
       getPathKey(settingsComponent) {
@@ -184,12 +183,15 @@ export default {
       this.settingsComponents.splice(index, 1);
     },
     getCoords(result) {
-      console.log(result);
-      this.currentCRS = result.data.projection.split(':')[1];
-      const pathRoot = result.data.click.world;
-      this.coordinates[1] = pathRoot.lat;
-      this.coordinates[0] = pathRoot.lon;
-      this.getCoordsMode = false;
+      if (this.getCoordsMode) {
+        console.log('test', result);
+        this.currentCRS = result.data.projection.split(':')[1];
+        const pathRoot = result.data.click.world;
+        this.coordinates[1] = pathRoot.lat;
+        this.coordinates[0] = pathRoot.lon;
+        this.getCoordsMode = false;
+        this.centralPointCounter += 1;
+      }
     },
     async getIsochroneRequest() {
       if (this.isHasRequests) {
@@ -213,9 +215,9 @@ export default {
                 }
             }
             );
-            console.log('data', response.data)
             singleRequest.requestResults = response.data;
             singleRequest.requestResults.crs = { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::4326" }}
+            singleRequest.requestResults.features[0].properties.color = singleRequest.color;
             this.sendResults(singleRequest)
         } catch (error) {
             // Handle the error
@@ -225,7 +227,7 @@ export default {
       }
       },
     async sendResults(singleRequest) {
-        console.log(singleRequest)
+        console.log('data', singleRequest);
         const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");
         // platformAPI.publish('3DEXPERIENCity.AddPolygon', {
         //     geojson: {
@@ -259,8 +261,8 @@ export default {
                 },
                 "representation": {
                     "geometryType": "Point",
-                    "id": `isochrones_${singleRequest.path}_${singleRequest.time}`,
-                    "name": `Isochrone-${singleRequest.path}-${singleRequest.time}`,
+                    "id": `p${this.centralPointCounter}_isochrones_${singleRequest.path}_${singleRequest.time}`,
+                    "name": `p${this.centralPointCounter}_Isochrone-${singleRequest.path}-${singleRequest.time}`,
                 },
                 "geojson": singleRequest.requestResults
             },
