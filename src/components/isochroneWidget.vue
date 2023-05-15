@@ -239,7 +239,7 @@ export default {
     },
     async sendResults(singleRequest) {
         console.log('data', singleRequest);
-        const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");ё
+        const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");
         // platformAPI.publish('3DEXPERIENCity.AddPolygon', {
         //     geojson: {
         //         "type": "FeatureCollection",						

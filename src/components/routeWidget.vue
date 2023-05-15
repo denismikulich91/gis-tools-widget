@@ -2,12 +2,18 @@
   <div class="col q-pa-xs">   
     <q-input square filled v-model="formattedFrom" label="From" :dense="dense" label-color="positive">
         <template v-slot:append>
-        <q-btn outline round size="sm" icon="place" color="positive"/>
+        <q-btn outline round size="sm"
+         icon="place" 
+         :color="getCoordsModeFrom ? 'red' : 'positive'"
+         @click="getCoordsModeFrom = !getCoordsModeFrom; point='p1'"
+         />
         </template>
     </q-input>
     <q-input square filled v-model="formattedTo" label="To" :dense="dense" label-color="positive">
         <template v-slot:append>
-        <q-btn outline round size="sm" icon="place" color="positive" style="width=25px" />
+        <q-btn outline round size="sm" icon="place" style="width=25px" 
+        :color="getCoordsModeTo ? 'red' : 'positive'"
+         @click="getCoordsModeTo = !getCoordsModeTo; point='p2'"/>
         </template>
     </q-input>
     <q-btn-toggle
@@ -65,6 +71,9 @@ export default {
                 'p1': [-0.4957, 51.7086], 
                 'p2': [-0.3713, 51.5196]
             },
+            point: 'p1',
+            getCoordsModeFrom: false,
+            getCoordsModeTo: false,
             widgetId: widget.id,
             routeNumberCount: 1,
             dense: null,
@@ -98,15 +107,16 @@ export default {
     },
     methods: {
         getCoords(result) {
-        if (this.getCoordsMode) {
-            console.log('test', result);
+        if (this.getCoordsModeFrom || this.getCoordsModeTo) {
+            console.log('From', result);
             // this.currentCRS = result.data.projection.split(':')[1];
             const pathRoot = result.data.click.world;
-            this.coordinates[1] = pathRoot.lat;
-            this.coordinates[0] = pathRoot.lon;
-            this.getCoordsMode = false;
+            this.coordinates[this.point][1] = pathRoot.lat;
+            this.coordinates[this.point][0] = pathRoot.lon;
+            this.getCoordsModeFrom = false;
+            this.getCoordsModeTo = false;
             this.centralPointCounter += 1;
-        }
+            }
         },
         async getIsochroneRequest() {
             const body = {
@@ -117,7 +127,7 @@ export default {
             try {
                 const response = await axios.post(
                     // TODO: check if the key wrong
-                `https://api.openrouteservice.org/v2/directions/${this.getPathParameter}`,
+                `https://api.openrouteservice.org/v2/directions/${this.getPathParameter}/geojson`,
                 body,
                 {
                     headers: {
