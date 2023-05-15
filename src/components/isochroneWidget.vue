@@ -13,8 +13,8 @@
     </q-btn>
 </div>
 <div class="row">
-    <q-input class="col" v-model="coordinates[0]" filled label="X" style="margin-top: 0px;"/>
-    <q-input class="col" v-model="coordinates[1]" filled label="Y" />
+    <q-input class="col" v-model="formattedLong" filled label="Longitude" style="margin-top: 0px;"/>
+    <q-input class="col" v-model="formattedLat" filled label="Latitude" />
 </div>  
 <q-input v-model="distanceMinutes" filled label="Set the isochrone distance in minutes" />
 <q-btn-toggle
@@ -31,18 +31,18 @@
     {value: 'Car', slot: '4'}
     ]"
 >
-<template v-slot:1>
-    <q-icon name="hiking" />
-</template>
-<template v-slot:2>
-    <q-icon name="directions_bike" />
-</template>
-<template v-slot:3>
-    <q-icon name="electric_moped" />
-</template>
-<template v-slot:4>
-    <q-icon name="directions_car" />
-</template>
+  <template v-slot:1>
+      <q-icon name="hiking" />
+  </template>
+  <template v-slot:2>
+      <q-icon name="directions_bike" />
+  </template>
+  <template v-slot:3>
+      <q-icon name="electric_moped" />
+  </template>
+  <template v-slot:4>
+      <q-icon name="directions_car" />
+  </template>
 </q-btn-toggle>
 <p>{{pathChoice}}</p>
 <div class="row justify-between items-center" style="margin-top: 30px">
@@ -130,7 +130,7 @@ export default {
           key: widget.getValue("key"),
           // key: "5b3ce3597851110001cf6248575c5a9ab2384617b5665773e5e51a29",
           currentCRS: "4326",
-          coordinates: [8.68149, 49.41],
+          coordinates: [0, 0],
           distanceMinutes: 10,
           pathChoice: "Walk",
           // pathOptions: ["Walk", "Bicycle", "Electric-bike", "Car"],
@@ -149,11 +149,16 @@ export default {
           },
         };
     },
-
     computed: {
         getOpacityFactor() {
             return this.opacity / 100;
         },
+      formattedLong: function() {
+        return this.coordinates[0].toFixed(4);
+      },
+      formattedLat: function() {
+        return this.coordinates[1].toFixed(4);
+      },
         isHasRequests() {
           return this.settingsComponents.length > 0;
         }
@@ -205,30 +210,36 @@ export default {
         try {
             const response = await axios.post(
                 // TODO: check if the key wrong
-            `https://api.openrouteservice.org/v2/isochrones/${singleRequest.path}`,
-            body,
-            {
-                headers: {
-                'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
-                'Content-Type': 'application/json',
-                'Authorization': this.key
-                }
-            }
+              `https://api.openrouteservice.org/v2/isochrones/${singleRequest.path}`,
+              body,
+              {
+                  headers: {
+                  'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
+                  'Content-Type': 'application/json',
+                  'Authorization': this.key
+                  }
+              }
             );
             singleRequest.requestResults = response.data;
-            singleRequest.requestResults.crs = { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::4326" }}
-            singleRequest.requestResults.features[0].properties.color = singleRequest.color;
+            // singleRequest.requestResults.crs = { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::4326" }}
+            // singleRequest.requestResults.features[0].properties.color = singleRequest.color;
             this.sendResults(singleRequest)
         } catch (error) {
-            // Handle the error
-            console.error(error);
+          // Handle the error
+          console.error(error);
         }
         }
       }
-      },
+    },
+    checkResolve(result) {
+      console.log('resolved...',result.topic, result);
+    },
+    checkReject(result) {
+      console.log('rejected', result.topic, result);
+    },
     async sendResults(singleRequest) {
         console.log('data', singleRequest);
-        const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");
+        const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");ё
         // platformAPI.publish('3DEXPERIENCity.AddPolygon', {
         //     geojson: {
         //         "type": "FeatureCollection",						
@@ -255,12 +266,7 @@ export default {
             "messageId": "fb5c5587-ba4e-4db4-9dfd-7b54338dd444",
             "publisher": this.widgetId,
             "data": {
-                "rendering": {
-                    "color": singleRequest.color,
-                    "opacity": singleRequest.opacity,
-                },
                 "representation": {
-                    "geometryType": "Point",
                     "id": `p${this.centralPointCounter}_isochrones_${singleRequest.path}_${singleRequest.time}`,
                     "name": `p${this.centralPointCounter}_Isochrone-${singleRequest.path}-${singleRequest.time}`,
                 },
@@ -270,6 +276,31 @@ export default {
             "9ovld2yA23OaauiKkGek"
             ]
         });
+        platformAPI.publish('xCity.set', {
+          // "messageId": "ce33219f-26d8-4cb8-9386-de565b7231ec",
+          "publisher": this.widgetId,
+          "data": {
+              "representation": {
+                  "id": `p${this.centralPointCounter}_isochrones_${singleRequest.path}_${singleRequest.time}`,
+                  "name": `p${this.centralPointCounter}_isochrone_${singleRequest.path}_${singleRequest.time}`,
+                  "selected": false,
+                  "visible": true,
+                  "type": "Polygon"
+                  // name: "08a4c267-0505-4f94-b21d-35b9933e3f9a_polygon_1"
+              },
+              "rendering": {
+                  "opacity": singleRequest.opacity / 100,
+                  "color": singleRequest.color,
+                  "elevationMode": "geometry",
+                  "elevationOffset": 0
+              }
+          },
+          "widgetId": [
+              "9ovld2yA23OaauiKkGek"
+          ]
+      });
+        // platformAPI.subscribe('xCity.resolve', result => this.checkResolve(result))
+        // platformAPI.subscribe('xCity.reject', result => this.checkReject(result))
     }
   }
 };

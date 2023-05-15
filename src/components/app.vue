@@ -47,6 +47,7 @@ import IsochroneWidget from './isochroneWidget.vue';
 import { useQuasar } from 'quasar'
 import RouteWidget from './routeWidget.vue';
 import { widget } from "@widget-lab/3ddashboard-utils";
+import { devtools } from 'vue';
 export default {
     components: {
         IsochroneWidget,
