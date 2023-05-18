@@ -47,6 +47,7 @@
         "@babel/preset-env": "^7.13.8",
         "@mdi/font": "^5.9.55",
         "@quasar/app": "^3.0.0-beta.28",
+        "@types/proj4": "^2.5.2",
         "@typescript-eslint/eslint-plugin": "^4.4.0",
         "@typescript-eslint/parser": "^4.4.0",
         "@vue/compiler-sfc": "^3.1.1",

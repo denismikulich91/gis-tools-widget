@@ -1,5 +1,5 @@
 <template>
-    <div class="q-pa-md example-column-row-width">
+    <div class="q-pa-xs example-column-row-width">
         <q-list bordered>
             <q-expansion-item
                 group="openRouteWidgets"
@@ -8,11 +8,11 @@
                 header-class="bg-primary text-white"
                 :default-opened="getActiveWidget==='isochrone'"
             >
-            <q-card>
-                <q-card-section>
-                    <isochrone-widget />
-                </q-card-section>
-            </q-card>
+                <q-card>
+                    <q-card-section>
+                        <isochrone-widget />
+                    </q-card-section>
+                </q-card>
             </q-expansion-item>
             <q-separator />
             <q-expansion-item
@@ -22,12 +22,12 @@
                 header-class="bg-positive text-white"
                 :default-opened="getActiveWidget==='routes'"
             >
-        <q-card>
-          <q-card-section>
-            <route-widget />
-          </q-card-section>
-        </q-card>
-      </q-expansion-item>
+                <q-card>
+                    <q-card-section>
+                        <route-widget />
+                    </q-card-section>
+                </q-card>
+            </q-expansion-item>
         </q-list>     
     </div>
 </template>
@@ -43,24 +43,23 @@
 </style>
 
 <script>
-import IsochroneWidget from './isochroneWidget.vue';
-import { useQuasar } from 'quasar'
-import RouteWidget from './routeWidget.vue';
+import IsochroneWidget from "./isochroneWidget.vue";
+import { useQuasar } from "quasar";
+import RouteWidget from "./routeWidget.vue";
 import { widget } from "@widget-lab/3ddashboard-utils";
-import { devtools } from 'vue';
 export default {
     components: {
         IsochroneWidget,
         RouteWidget
         },
         setup () {
-        const $q = useQuasar()
-        $q.dark.set(widget.getValue("nightMode"))
+        const $q = useQuasar();
+        $q.dark.set(widget.getValue("nightMode"));
         },
     computed: {
         getActiveWidget() {
-            return widget.getValue("defaultWidget")
+            return widget.getValue("defaultWidget");
         }
     }
-}
+};
 </script>
