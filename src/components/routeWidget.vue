@@ -52,7 +52,7 @@
             </template>
         </q-btn-toggle>
         <p>{{ travelChoice }}</p>
-        <q-btn class="run-button" style="margin-top: 25px" color="secondary" label="Get route" @click="getIsochroneRequest" />
+        <q-btn class="run-button" style="margin-top: 25px" color="secondary" label="Get route" @click="getRouteRequest" />
     </div>
 </template>
 
@@ -163,7 +163,7 @@ export default {
                 });
             }
         },
-        async getIsochroneRequest() {
+        async getRouteRequest() {
             const body = {
                 coordinates: [this.coordinates.p1, this.coordinates.p2],
                 geometry_simplify: "true",
@@ -193,7 +193,8 @@ export default {
             platformAPI.publish("3DEXPERIENCity.AddLine", {
                         geojson: {
             				"type": "FeatureCollection",
-            				"features": response.features
+            				"features": response.features,
+                            "attributes": {"test": "test", "data":"123"}
             			},
                         layer: {
                             id: `searchResultLines${this.routeNumberCount}`,
@@ -216,6 +217,7 @@ export default {
                             }
                     });
                     this.routeNumberCount += 1;
+                    console.log('route data:', response);
             // response.features[0].properties.style = { color: "#00d600", width: 3 };
             // platformAPI.publish("xCity.addData", {
             //     messageId: "fb5c5587-ba4e-4db4-9dfd-7b54338dd444",

@@ -28,6 +28,20 @@
                     </q-card-section>
                 </q-card>
             </q-expansion-item>
+            <q-separator />
+            <q-expansion-item
+                group="openRouteWidgets"
+                icon="sunny"
+                label="Get weather"
+                header-class="bg-primary text-white"
+                :default-opened="getActiveWidget==='weather'"
+            >
+                <q-card>
+                    <q-card-section>
+                        <weather-widget />
+                    </q-card-section>
+                </q-card>
+            </q-expansion-item>
         </q-list>     
     </div>
 </template>
@@ -46,11 +60,13 @@
 import IsochroneWidget from "./isochroneWidget.vue";
 import { useQuasar } from "quasar";
 import RouteWidget from "./routeWidget.vue";
+import WeatherWidget from "./weatherWidget.vue";
 import { widget } from "@widget-lab/3ddashboard-utils";
 export default {
     components: {
         IsochroneWidget,
-        RouteWidget
+        RouteWidget,
+        WeatherWidget
         },
         setup () {
         const $q = useQuasar();

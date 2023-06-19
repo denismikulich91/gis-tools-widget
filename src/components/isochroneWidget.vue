@@ -294,6 +294,9 @@ export default {
             //             "geometryType": "Polygon",
 
             //         },
+            //         "options": {
+            //             "color": "red",
+            //         },
             //         "geojson": singleRequest.requestResults
             //     },
             //     'style': myStyle,
