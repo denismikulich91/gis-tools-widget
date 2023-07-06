@@ -28,6 +28,16 @@
             data-mode="compact"
         >
         </div>
+      </div>
+      <div class="flex" style="background-color: #F8F8F8; padding: 0px 0px 15px 15px;">
+        <q-btn
+          outline
+          round
+          size="sm"
+          icon="place"
+          :color="getCoordsMode ? 'red' : 'primary'"
+          @click="getCoordsMode = !getCoordsMode"
+      />
     </div>
 </template>
 
@@ -39,13 +49,18 @@
             windowWidth: 0,
             widgetType: "compact",
             dataLat: 0,
-            dataLng: 0
+            dataLng: 0,
+            getCoordsMode: false
         }
     },
     async mounted() {
       const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");
-      platformAPI.subscribe("xCity.resolve", result => (result.topic === "xCity.onClick" ? this.getCoords(result) : null));
-
+      platformAPI.subscribe("xCity.resolve", result => (
+        result.topic === "xCity.onClick" && this.getCoordsMode ? this.getCoords(result) : null));
+      // const script = document.createElement('script');
+      // script.async = true;
+      // script.src = 'https://windy.app/widgets-code/forecast/windy_weather_async.js?v16';
+      // document.getElementById('windy-widget').appendChild(script);
       
   },
   methods: {
@@ -53,15 +68,14 @@
       this.windowWidth = window.innerWidth;
     },
     async getCoords(result) {
-      console.log('test')
       const pathRoot = result.data.click.world;
       this.dataLat = pathRoot.lat;
       this.dataLng = pathRoot.lon;
-      console.log(this.dataLat, this.dataLng)
       const script = document.createElement('script');
       script.async = true;
       script.src = 'https://windy.app/widgets-code/forecast/windy_weather_async.js?v16';
       document.getElementById('windy-widget').appendChild(script);
+      this.getCoordsMode = false;
   },
 },
   created() {
