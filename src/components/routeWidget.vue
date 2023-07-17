@@ -1,6 +1,6 @@
 <template>
-    <div class="col q-pa-xs">
-        <q-input v-model="formattedFrom" square filled label="From" label-color="positive">
+    <div class="col">
+        <q-input v-model="address[0]" square filled label="From" label-color="positive">
             <template #append>
                 <q-btn
                     outline
@@ -12,7 +12,7 @@
                 />
             </template>
         </q-input>
-        <q-input v-model="formattedTo" square filled label="To" label-color="positive">
+        <q-input v-model="address[1]" square filled label="To" label-color="positive">
             <template #append>
                 <q-btn
                     outline
@@ -52,6 +52,10 @@
             </template>
         </q-btn-toggle>
         <p>{{ travelChoice }}</p>
+        <div class="flex row">
+            <q-input class="col-6" v-model="distance" square label="Distance" label-color="positive"/>
+            <q-input class="col-6" v-model="duration" square label="Duration" label-color="positive"/>
+        </div>
         <q-btn class="run-button" style="margin-top: 25px" color="secondary" label="Get route" @click="getRouteRequest" />
     </div>
 </template>
@@ -69,6 +73,7 @@
 <script>
 import axios from "axios";
 import { widget, requirejs } from "@widget-lab/3ddashboard-utils";
+import { getAddress, getFormattedTime, getFormattedDistance } from '../plugins/utils.js'
 export default {
     name: "RouteWidget",
     data() {
@@ -79,13 +84,15 @@ export default {
                 p2: [0, 0]
             },
             point: "p1",
+            address: [null, null],
+            distance: 0,
+            duration: 0,
             getCoordsModeFrom: false,
             getCoordsModeTo: false,
             widgetId: widget.id,
             routeNumberCount: 1,
             pointType: "",
             key: widget.getValue("key"),
-            // key: "5b3ce3597851110001cf6248575c5a9ab2384617b5665773e5e51a29",
             travelChoice: "Walk",
             pathMapping: {
                 Walk: "foot-walking",
@@ -99,6 +106,9 @@ export default {
     computed: {
         getPathParameter() {
             return this.pathMapping[this.travelChoice];
+        },
+        getDuration() {
+            return `${this.duration / 60}`
         },
         getPointType() {
             return this.pointType === "Start" ? "Finish" : "Start";
@@ -119,18 +129,25 @@ export default {
         platformAPI.subscribe("xCity.resolve", result => (result.topic === "xCity.onClick" ? this.getCoords(result) : null));
     },
     methods: {
+        async getClickedAddress(lat, long) {
+            const result = await getAddress(lat, long);
+            if (this.point === "p1"){
+                this.address[0] = result.display_name;
+            } else {
+                this.address[1] = result.display_name; 
+            }
+            
+        },
         async getCoords(result) {
             if (this.getCoordsModeFrom || this.getCoordsModeTo) {
-                console.log("From", result);
                 const pathRoot = result.data.click.world;
                 const pathRootLocal = result.data.click.local;
                 this.coordinates[this.point][1] = pathRoot.lat;
                 this.coordinates[this.point][0] = pathRoot.lon;
+                this.getClickedAddress(pathRoot.lat, pathRoot.lon);
                 this.getCoordsModeFrom = false;
                 this.getCoordsModeTo = false;
                 this.pointType = this.getPointType;
-                console.log(pathRootLocal.x, pathRootLocal.y);
-                console.log(this.key);
 
                 const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");
                 platformAPI.publish("3DEXPERIENCity.AddMarker", {
@@ -189,6 +206,8 @@ export default {
             }
         },
         async sendResults(response) {
+            this.distance = getFormattedDistance(response.features[0].properties.summary.distance);
+            this.duration = getFormattedTime(response.features[0].properties.summary.duration);
             const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");
             platformAPI.publish("3DEXPERIENCity.AddLine", {
                         geojson: {

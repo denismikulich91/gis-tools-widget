@@ -16,8 +16,7 @@
         </q-btn>
     </div>
     <div class="row">
-        <q-input v-model="formattedLong" class="col" filled label="Longitude" style="margin-top: 0px" />
-        <q-input v-model="formattedLat" class="col" filled label="Latitude" />
+        <q-input v-model="address" class="col" filled label="Address" style="margin-top: 0px" />
     </div>
     <q-input v-model="distanceMinutes" filled label="Set the isochrone distance in minutes" />
     <q-btn-toggle
@@ -68,7 +67,7 @@
             />
         </div>
         <div class="row justify-start">
-          <q-btn style="height: 15px; width: 15px; margin-right: 10px;" color="secondary" icon="restart_alt" @click="settingsComponents=[]" />
+             <q-btn style="height: 15px; width: 15px; margin-right: 10px;" color="secondary" icon="restart_alt" @click="settingsComponents=[]" />
             <q-btn style="height: 15px; width: 15px" color="secondary" icon="add" @click="addComponent" />
         </div>
       </div>
@@ -93,7 +92,6 @@
         </q-popup-proxy>
     </q-btn>
 </template>
-
 <style>
 /* Styles to set if day/night mode toggled */
 .body--light {
@@ -108,6 +106,7 @@
 import axios from "axios";
 import { widget, requirejs } from "@widget-lab/3ddashboard-utils";
 import settingsIconComponent from "./settingsIconComponents.vue";
+import { getAddress } from '../plugins/utils.js'
 
 export default {
     name: "IsochroneWidget",
@@ -116,6 +115,7 @@ export default {
     },
     data() {
         return {
+            address: null,
             centralPointCounter: 0,
             settingsComponents: [],
             getCoordsMode: false,
@@ -123,7 +123,6 @@ export default {
             isochroneColor: "#42a2da",
             widgetId: widget.id,
             key: widget.getValue("key"),
-            // key: "5b3ce3597851110001cf6248575c5a9ab2384617b5665773e5e51a29",
             currentCRS: "4326",
             coordinates: [0, 0],
             distanceMinutes: 10,
@@ -140,12 +139,7 @@ export default {
         getOpacityFactor() {
             return this.opacity / 100;
         },
-        formattedLong() {
-            return this.coordinates[0].toFixed(4);
-        },
-        formattedLat() {
-            return this.coordinates[1].toFixed(4);
-        },
+
         isHasRequests() {
             return this.settingsComponents.length > 0;
         }
@@ -170,23 +164,26 @@ export default {
                 coordinates: this.coordinates,
                 path: this.pathMapping[this.pathChoice].code
             });
-            console.log(this.settingsComponents);
         },
         removeComponent(index) {
             this.settingsComponents.splice(index, 1);
         },
+        async getClickedAddress(lat, long) {
+            const result = await getAddress(lat, long);
+            this.address = result.display_name;
+        },
         async getCoords(result) {
             if (this.getCoordsMode) {
-                console.log("test", result);
+                console.log("coords: ", result);
                 this.currentCRS = result.data.projection.split(":")[1];
                 const pathRoot = result.data.click.world;
                 const pathRootLocal = result.data.click.local;
                 this.coordinates[1] = pathRoot.lat;
                 this.coordinates[0] = pathRoot.lon;
+                this.getClickedAddress(this.coordinates[1], this.coordinates[0]);
                 this.centralPointCounter += 1;
-                this.getCoordsMode = false;
+                this.getCoordsMode = false;       
                 const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");
-                console.log(pathRootLocal.x, pathRootLocal.y);
                 platformAPI.publish("3DEXPERIENCity.AddMarker", {
                     widgetID: this.widgetId,
                     position: [pathRootLocal.x, pathRootLocal.y],
@@ -217,12 +214,10 @@ export default {
         async getIsochroneRequest() {
             if (this.isHasRequests) {
                 for (const singleRequest of this.settingsComponents) {
-                    console.log(singleRequest);
                     const body = {
                         locations: [singleRequest.coordinates],
                         range: [singleRequest.time * 60]
                     };
-                    console.log("time:", singleRequest.time * 60);
                     try {
                         const response = await axios.post(
                             // TODO: check if the key wrong
@@ -247,7 +242,7 @@ export default {
             }
         },
         async sendResults(singleRequest) {
-            console.log("data", singleRequest);
+            console.log("Received data:", singleRequest);
             // const passingCoords = singleRequest.requestResults.features[0].geometry.coordinates[0];
             // passingCoords = convertCoordsArray(passingCoords)
             const platformAPI = await requirejs("DS/PlatformAPI/PlatformAPI");
@@ -259,10 +254,6 @@ export default {
                 layer: {
                     id: `p${this.centralPointCounter}_isochrones_${singleRequest.path}_${singleRequest.time}`,
                     name: `p${this.centralPointCounter}_Isochrone-${singleRequest.path}-${singleRequest.time}`,
-                    attributeMapping: {
-                        // NAME: 'mag',
-                        // STRID: 'code'
-                    }
                 },
                 folder: {
                     id: `searchResults${this.centralPointCounter}`,

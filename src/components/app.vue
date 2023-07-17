@@ -1,5 +1,5 @@
 <template>
-    <div class="q-pa-xs example-column-row-width">
+    <div class="container">
         <q-list bordered>
             <q-expansion-item
                 group="openRouteWidgets"
