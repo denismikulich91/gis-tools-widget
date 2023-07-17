@@ -42,5 +42,6 @@
     "[html]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "vetur.experimental.templateInterpolationService": true
+    "vetur.experimental.templateInterpolationService": true,
+    "editor.tabSize": 2
 }

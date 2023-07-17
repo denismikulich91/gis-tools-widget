@@ -12,13 +12,13 @@ async function getAddress(lat, long) {
     }
 };
 
-const getFormattedTime = (seconds) => {
+const getFormattedTime = seconds => {
     const minutes = Math.round(seconds / 60); 
     const h = Math.floor(minutes / 60);
     const m = minutes - h * 60;
     return `${h}h ${m}min`;
 };
-const getFormattedDistance = (meters) => {
+const getFormattedDistance = meters => {
     const km = Math.floor(meters / 1000);
     const m = Math.round(meters) - km * 1000;
     return `${km}km ${m}m`;

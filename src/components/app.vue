@@ -48,12 +48,12 @@
 
 <style>
 /* Styles to set if day/night mode toggled */
-    .body--light {
-        background-color: white;
-    }
-    .body--dark #q-app {
-        background-color: rgb(27, 38, 31);
-    }
+.body--light {
+  background-color: white;
+}
+.body--dark #q-app {
+  background-color: rgb(27, 38, 31);
+}
 </style>
 
 <script>
@@ -63,19 +63,19 @@ import RouteWidget from "./routeWidget.vue";
 import WeatherWidget from "./weatherWidget.vue";
 import { widget } from "@widget-lab/3ddashboard-utils";
 export default {
-    components: {
-        IsochroneWidget,
-        RouteWidget,
-        WeatherWidget
-        },
-        setup () {
-        const $q = useQuasar();
-        $q.dark.set(widget.getValue("nightMode"));
-        },
-    computed: {
-        getActiveWidget() {
-            return widget.getValue("defaultWidget");
-        }
+  components: {
+    IsochroneWidget,
+    RouteWidget,
+    WeatherWidget
+  },
+  setup () {
+    const $q = useQuasar();
+    $q.dark.set(widget.getValue("nightMode"));
+  },
+  computed: {
+    getActiveWidget() {
+      return widget.getValue("defaultWidget");
     }
+  }
 };
 </script>
