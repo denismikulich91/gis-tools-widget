@@ -1,0 +1,9 @@
+.zipignore
+dist/*
+node_modules/*
+.git*
+test/report/*
+test/e2e/report/*
+package-lock.json
+widget-config.js
+README.md
