@@ -15,6 +15,32 @@
             <q-separator />
               <q-expansion-item
                 group="utilities"
+                icon="adjust"
+                label="Create point buffer"
+                header-class="bg-info text-black"
+            >
+                <q-card>
+                    <q-card-section>
+                      <getBufferTool />
+                    </q-card-section>
+                </q-card>
+            </q-expansion-item>
+            <q-separator />
+              <q-expansion-item
+                group="utilities"
+                icon="timeline"
+                label="To replace"
+                header-class="bg-accent text-black"
+            >
+                <q-card>
+                    <q-card-section>
+                      <p>Tool 2</p>
+                    </q-card-section>
+                </q-card>
+            </q-expansion-item>
+            <q-separator />
+              <q-expansion-item
+                group="utilities"
                 icon="timeline"
                 label="Create points on the polyline"
                 header-class="bg-info text-black"
@@ -57,10 +83,12 @@
 </template>
 <script>
 import getLengthTool from './getLengthTool.vue';
+import getBufferTool from './getBufferTool.vue';
   export default {
 	name: "UtilityWidget",
   components: {
     getLengthTool,
+    getBufferTool
   },
 	data() {
 		return {
