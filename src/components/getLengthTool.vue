@@ -1,7 +1,7 @@
 <template>
     <div class="q-pa-xs">
         <div class="q-gutter-md" style="max-width: 300px">
-            <q-btn size="sm" outline :color="getDataMode ? 'red' : 'primary'" label="Choose" @click="getDataMode = !getDataMode; if(!getDataMode) repeateMode = getDataMode" />
+            <q-btn size="sm" outline :color="getDataMode ? 'red' : 'primary'" label="Select" @click="getDataMode = !getDataMode; if(!getDataMode) repeateMode = getDataMode" />
             <q-btn size="sm" round outline :color="repeateMode ? 'red' : 'primary'" icon="restart_alt" @click="repeateMode = !repeateMode; getDataMode = repeateMode"/>
             <p v-show="polylineLength>0">Polygon length: {{ polylineLength }} km</p>
         </div>
