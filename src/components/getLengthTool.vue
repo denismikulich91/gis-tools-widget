@@ -14,6 +14,7 @@ import { retrieveReferential, retrieveGeoItemDatasetRepresentations } from '../j
 import * as turf from '@turf/turf';
 export default {
 	name: "getLengthTool",
+  //kdksjlksdjs
 	data() {
 		return {
 			pathFile: "",
